@@ -3821,3 +3821,7 @@ def conv2d_backward_weight(
         kernel_layout,
         out_dtype,
     )
+
+
+def tutorial_add(data, val, dtype=None):
+    return _make.tutorial_add(data, val, dtype)

@@ -1675,5 +1675,48 @@ Example::
     .set_attr<FTVMCompute>("FTVMCompute", BatchToSpaceNDCompute)
     .set_attr<TOpPattern>("TOpPattern", kInjective);
 
+
+TVM_REGISTER_NODE_TYPE(TutorialAddAttrs);
+bool TutorialAddRel(const Array<Type>& types, int num_inputs, const Attrs& attrs, const TypeReporter& reporter) {
+   ICHECK_EQ(types.size(), 2) << "Expects two types, one for the input and another for the output";
+    const auto* data = types[0].as<TensorTypeNode>();
+    if (data == nullptr) {
+        ICHECK(types[0].as<IncompleteTypeNode>())
+        << "TutorialAdd: expect input type to be TensorType but get " << types[0];
+        return false;
+    }
+
+    const auto* param = attrs.as<TutorialAddAttrs>();
+
+    auto dtype = param->dtype;
+    if (dtype.is_void()) {
+        dtype = data->dtype;
+    }
+
+    reporter->Assign(types[1], TensorType(data->shape, dtype));
+
+    return true;
+}
+
+// kOpaque 提示 TVM 无需融合这个算子。
+RELAY_REGISTER_OP("TutorialAdd")
+    .describe(
+        R"doc(Return the tensor add val)doc" TVM_ADD_FILELINE)
+    .set_num_inputs(1)
+    .add_argument("data", "Tensor", "The input tensor.")
+    .set_support_level(3)
+    .add_type_rel("TutorialAdd", TutorialAddRel)
+    .set_attr<TOpPattern>("TOpPattern", kOpaque);
+
+
+Expr MakeTutorialAdd(Expr data, double val, DataType dtype) {
+    auto attrs = make_object<TutorialAddAttrs>();
+    attrs->val = val;
+    attrs->dtype = dtype;
+    static const Op& op = Op::Get("TutorialAdd");
+    return Call(op, {data}, Attrs(attrs), {});
+}
+TVM_REGISTER_GLOBAL("relay.op.nn._make.tutorial_add").set_body_typed(MakeTutorialAdd);
+
 }  // namespace relay
 }  // namespace tvm

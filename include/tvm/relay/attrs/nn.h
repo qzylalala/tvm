@@ -1586,6 +1586,18 @@ struct NLLLossAttrs : public tvm::AttrsNode<NLLLossAttrs> {
   }
 };  // struct NLLLossAttrs
 
+/*! \brief Attributes used in TutorialAddAttrs operator */
+struct TutorialAddAttrs : public tvm::AttrsNode<TutorialAddAttrs> {
+    double val;
+    DataType dtype;
+    TVM_DECLARE_ATTRS(TutorialAddAttrs, "relay.attrs.TutorialAddAttrs") {
+        TVM_ATTR_FIELD(val).set_default(0.).describe(
+            "The (double)val to add."
+        );
+        TVM_ATTR_FIELD(dtype).set_default(NullValue<DataType>()).describe("the dtype of input");
+    }
+}; // struct TutorialAddAttrs
+
 }  // namespace relay
 }  // namespace tvm
 #endif  // TVM_RELAY_ATTRS_NN_H_

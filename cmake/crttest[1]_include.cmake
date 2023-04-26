@@ -1,0 +1,5 @@
+if(EXISTS "/home/qzylalala/work_space/tvm/cmake/crttest[1]_tests.cmake")
+  include("/home/qzylalala/work_space/tvm/cmake/crttest[1]_tests.cmake")
+else()
+  add_test(crttest_NOT_BUILT crttest_NOT_BUILT)
+endif()

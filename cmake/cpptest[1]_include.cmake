@@ -1,0 +1,5 @@
+if(EXISTS "/home/qzylalala/work_space/tvm/cmake/cpptest[1]_tests.cmake")
+  include("/home/qzylalala/work_space/tvm/cmake/cpptest[1]_tests.cmake")
+else()
+  add_test(cpptest_NOT_BUILT cpptest_NOT_BUILT)
+endif()
