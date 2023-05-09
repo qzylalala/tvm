@@ -1,0 +1,5 @@
+if(USE_PIMCODEGENC)
+  message(STATUS "Build with contrib.pim")
+  file(GLOB CSOURCE_RELAY_CONTRIB_SRC src/relay/backend/contrib/pim/codegen.cc)
+  list(APPEND COMPILER_SRCS ${CSOURCE_RELAY_CONTRIB_SRC})
+endif(USE_PIMCODEGENC)
