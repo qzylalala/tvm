@@ -178,6 +178,10 @@ class CSourceCodegen : public CSourceModuleCodegenBase {
 
  private:
   std::ostringstream code_stream_;
+  /*! \brief The accumulated constant names, in the order they were generated. */
+  Array<String> const_names_;
+  /*! \brief The accumulated function names. */
+  Array<String> func_names_;
 };
 
 
@@ -190,6 +194,7 @@ void CSourceCodegen::GenCFunc(const Function& func) {
   CodegenC builder(sid);
   auto out = builder.VisitExpr(func->body);
   code_stream_ << builder.JIT(out);
+  func_names_.push_back(sid);
 }
 
 
@@ -239,10 +244,12 @@ runtime::Module CSourceCodegen::CreateCSourceModule(const ObjectRef& ref) {
                << "\n";
   }
 
+  VLOG(1) << "CodegenCModule generated:" << std::endl << code_stream_.str();
+
   // 创建一个 CSourceModule
-  const auto* pf = runtime::Registry::Get("module.CSourceModuleCreate");
+  const auto* pf = runtime::Registry::Get("runtime.CSourceModuleCreate");
   ICHECK(pf != nullptr) << "Cannot find csource module to create the external runtime module";
-  return (*pf)(code_stream_.str(), "cc");
+  return (*pf)(code_stream_.str(), "cc", func_names_, /*const_vars=*/Array<String>());
 }
 
 runtime::Module PIMCompiler(const ObjectRef& ref) {
@@ -250,7 +257,7 @@ runtime::Module PIMCompiler(const ObjectRef& ref) {
   return csource.CreateCSourceModule(ref);
 }
 
-TVM_REGISTER_GLOBAL("relay.ext.PIMCompiler").set_body_typed(PIMCompiler);
+TVM_REGISTER_GLOBAL("relay.ext.pim").set_body_typed(PIMCompiler);
 
 }
 }
