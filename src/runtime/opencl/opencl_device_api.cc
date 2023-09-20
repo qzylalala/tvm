@@ -198,6 +198,13 @@ void OpenCLWorkspace::GetAttr(Device dev, DeviceAttrKind kind, TVMRetValue* rv) 
       *rv = std::string(value);
       break;
     }
+    case kL2CacheSizeBytes:
+      // NOTE(Zihao): this API cannot reflect the real L2 cache size in both CUDA/AMD GPUs.
+      cl_ulong value;
+      OPENCL_CALL(clGetDeviceInfo(device_id, CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, sizeof(value), &value,
+                                  nullptr));
+      *rv = static_cast<int64_t>(value);
+      break;
   }
 }
 
@@ -232,7 +239,7 @@ void* OpenCLWorkspace::AllocDataSpace(Device dev, size_t size, size_t alignment,
 
 void* OpenCLWorkspace::AllocDataSpace(Device dev, int ndim, const int64_t* shape, DLDataType dtype,
                                       Optional<String> mem_scope) {
-  if (!mem_scope.defined() || mem_scope.value() == "global") {
+  if (!mem_scope.defined() || mem_scope.value().empty() || mem_scope.value() == "global") {
     return DeviceAPI::AllocDataSpace(dev, ndim, shape, dtype, mem_scope);
   }
   ICHECK(IsTextureStorage(std::string(mem_scope.value())))
